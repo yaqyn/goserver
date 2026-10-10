@@ -16,6 +16,8 @@ jobs:
       - run: test -z "$(gofmt -l main.go http.go http_test.go)"
       - run: go vet ./...
       - run: go test -race -cover ./...
+      - run: bash -n launch
+      - run: ./launch help
       - run: docker compose config --quiet
       - run: docker build --build-arg VERSION=${{ github.sha }} -t portlight:ci .
       - name: Container smoke test

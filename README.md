@@ -11,7 +11,7 @@ A focused Go HTTP service with a predictable startup, a small JSON API, and a
 clean shutdown. Built from Docker coursework into a containerized service with
 validated configuration, structured logs, and a minimal runtime image.
 
-[Run locally](#run-locally) · [HTTP contract](#http-contract) · [Operating boundaries](#operating-boundaries)
+[Install and launch](#install-and-launch) · [HTTP contract](#http-contract) · [Operating boundaries](#operating-boundaries)
 
 ## <img src="docs/readme/icons/overview.svg" width="24" height="24" alt=""> Built to stay understandable
 
@@ -22,9 +22,38 @@ validated configuration, structured logs, and a minimal runtime image.
 - **Small runtime:** a static Go binary in a scratch image, running as UID 65532.
 - **No third-party Go dependencies:** the service uses the standard library.
 
-## <img src="docs/readme/icons/launch.svg" width="24" height="24" alt=""> Run locally
+## <img src="docs/readme/icons/launch.svg" width="24" height="24" alt=""> Install and launch
 
-Requires Go 1.27.1+ for native execution, or Docker with Compose for containers.
+With **Git, Docker Engine, Docker Compose v2, Bash, and curl** installed, one line
+clones the project, builds the image, starts the service, and waits for readiness:
+
+```bash
+git clone https://github.com/yaqyn/portlight-http-server.git && cd portlight-http-server && ./launch
+```
+
+The launcher prints **Ready: http://localhost:8991** after the health check succeeds.
+It checks prerequisites and explains daemon, permission, and port-conflict errors.
+It does not install system packages or require a local Go toolchain.
+
+Already cloned? Run **`./launch`** from the repository.
+
+| Task | Command |
+| --- | --- |
+| Start or rebuild | `./launch` |
+| Stop and remove project containers | `./launch stop` |
+| Inspect container status | `./launch status` |
+| Follow logs | `./launch logs` |
+| Show usage | `./launch help` |
+| Choose another port | `HOST_PORT=8992 ./launch` |
+
+Starting is explicit: the service does not auto-start on reboot. Logs can be closed
+with Ctrl+C without stopping the service. The Compose project name is fixed to
+`portlight`, so commands target the same project regardless of folder name.
+
+<details>
+<summary>Prefer running directly with Go?</summary>
+
+Requires Go 1.27.1+:
 
 ```bash
 go run .
@@ -32,20 +61,9 @@ curl http://localhost:8991/
 ```
 
 Override the listening port with `PORT=8080 go run .`. Missing `PORT` defaults to
-8991; invalid values exit with an error instead of silently selecting a port.
+8991; invalid values exit with an error. Ctrl+C gracefully stops the native server.
 
-For the constrained container configuration:
-
-```bash
-docker compose up --build -d
-curl http://localhost:8991/healthz
-docker compose logs -f
-# Stop when finished; containers do not auto-start on reboot.
-docker compose down
-```
-
-If 8991 is occupied, use `HOST_PORT=8992 docker compose up --build -d`, then
-visit `http://localhost:8992/`. Compose binds the published port to loopback.
+</details>
 
 To build a versioned image yourself:
 
