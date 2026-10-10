@@ -1,6 +1,9 @@
 ![Portlight — Small service. Clear signals.](docs/readme/cover.png)
 
-# Portlight
+# Portlight — HTTP Server
+
+> **Learning Journey Project · Boot.dev**
+> Developed through Docker coursework and extended with practical server hardening.
 
 **Small service. Clear signals.**
 
