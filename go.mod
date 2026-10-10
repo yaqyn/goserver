@@ -1,3 +1,3 @@
-module github.com/yaqyn/goserver
+module github.com/yaqyn/portlight
 
 go 1.27.1
