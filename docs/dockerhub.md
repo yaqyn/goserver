@@ -13,7 +13,7 @@ validated configuration, structured logs, and a minimal runtime image.
 
 [Install and launch](#install-and-launch) · [HTTP contract](#http-contract) · [Operating boundaries](#operating-boundaries)
 
-## <img src="https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/icons/overview.svg" width="24" height="24" alt=""> Built to stay understandable
+## ![](https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/icons/overview.png) Built to stay understandable
 
 - **Explicit behavior:** GET and HEAD routes, real 404s, and method rejection.
 - **Clear signals:** health endpoints and JSON request logs.
@@ -22,7 +22,7 @@ validated configuration, structured logs, and a minimal runtime image.
 - **Small runtime:** a static Go binary in a scratch image, running as UID 65532.
 - **No third-party Go dependencies:** the service uses the standard library.
 
-## <img src="https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/icons/launch.svg" width="24" height="24" alt=""> Install and launch
+## ![](https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/icons/launch.png) Install and launch
 
 With **Git, Docker Engine, Docker Compose v2, Bash, and curl** installed, one line
 clones the project, builds the image, starts the service, and waits for readiness:
@@ -82,7 +82,7 @@ Use `1.0.0` for this release or `latest` for the current published release. Imag
 currently target Linux amd64. Remove the container with `docker stop portlight`
 followed by `docker rm portlight` when finished.
 
-## <img src="https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/icons/contract.svg" width="24" height="24" alt=""> HTTP contract
+## ![](https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/icons/contract.png) HTTP contract
 
 | Route | GET response | Purpose |
 | --- | --- | --- |
@@ -95,7 +95,7 @@ return 404. Responses disable caching and send `X-Content-Type-Options: nosniff`
 Health endpoints contain no dependency checks because the service has no database
 or external service dependencies.
 
-## <img src="https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/icons/architecture.svg" width="24" height="24" alt=""> From source to request
+## ![](https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/icons/architecture.png) From source to request
 
 ```text
 Go source → static binary → non-root scratch image
@@ -107,7 +107,7 @@ The image builds from source rather than a binary sitting on a developer's
 machine. Its build context includes only the Go module and application source;
 local credentials, examples, and generated assets stay outside the image.
 
-## <img src="https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/icons/operations.svg" width="24" height="24" alt=""> Operating boundaries
+## ![](https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/icons/operations.png) Operating boundaries
 
 | Setting | Value |
 | --- | --- |
@@ -131,7 +131,7 @@ This repository provides a hardened small-service baseline, not evidence of
 production deployment or a security certification. Rebuild regularly to pick up
 Go security updates and verify the image in your own environment.
 
-## <img src="https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/icons/verify.svg" width="24" height="24" alt=""> Verify the contract
+## ![](https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/icons/verify.png) Verify the contract
 
 ```bash
 go test -race -cover ./...
@@ -143,7 +143,7 @@ CI verifies formatting, tests, static analysis, image construction, HTTP smoke
 checks, and a zero-exit graceful container shutdown. No deployment or registry
 credentials are required by the workflow.
 
-## <img src="https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/icons/origin.svg" width="24" height="24" alt=""> Learning roots
+## ![](https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/icons/origin.png) Learning roots
 
 Portlight started as a Boot.dev Docker exercise. The original Caddy networking
 configuration and Python book-report exercise remain under `examples/`; they
