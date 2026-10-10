@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
+
+usage() {
+  cat <<'HELP'
+Portlight — HTTP Server
+Usage: ./launch [start|stop|status|logs|help]
+
+  start   Build, start, and wait for a healthy service (default)
+  stop    Stop and remove this project's containers
+  status  Show this project's container status
+  logs    Follow service logs; Ctrl+C leaves the service running
+
+Set HOST_PORT to choose another local port, e.g. HOST_PORT=8992 ./launch.
+Requires Docker Engine and Docker Compose v2. Starting also requires curl.
+HELP
+}
+fail() { printf 'Portlight: %s\n' "$*" >&2; exit 1; }
+action="${1:-start}"
+[[ $# -le 1 ]] || { usage >&2; exit 2; }
+case "$action" in
+  help|-h|--help) usage; exit 0 ;;
+  start|stop|status|logs) ;;
+  *) usage >&2; exit 2 ;;
+esac
+command -v docker >/dev/null || fail 'Install Docker Engine and the Compose plugin, then retry.'
+docker compose version >/dev/null 2>&1 || fail 'Docker Compose v2 is required.'
+docker info >/dev/null 2>&1 || fail 'Cannot reach Docker. Start the daemon and check socket permissions (on Linux, try newgrp docker).'
+export HOST_PORT="${HOST_PORT:-8991}"
+[[ "$HOST_PORT" =~ ^[0-9]{1,5}$ ]] || fail 'HOST_PORT must be an integer between 1 and 65535.'
+HOST_PORT=$((10#$HOST_PORT))
+[[ "$HOST_PORT" -ge 1 && "$HOST_PORT" -le 65535 ]] || fail 'HOST_PORT must be an integer between 1 and 65535.'
+case "$action" in
+  stop) docker compose down; printf 'Portlight stopped.\n'; exit 0 ;;
+  status) docker compose ps -a; exit 0 ;;
+  logs) docker compose logs --follow --tail=100 portlight; exit 0 ;;
+esac
+command -v curl >/dev/null || fail 'Install curl, then retry.'
+printf '\nPortlight — HTTP Server\nBuilding and starting on http://localhost:%s ...\n\n' "$HOST_PORT"
+if ! docker compose up --build --detach; then
+  fail "Startup failed. Check the output above; if the port is occupied, try HOST_PORT=8992 ./launch."
+fi
+for ((attempt=0; attempt<30; attempt++)); do
+  if curl --fail --silent --max-time 2 "http://127.0.0.1:${HOST_PORT}/healthz" >/dev/null; then
+    printf '\nReady: http://localhost:%s\nHealth: http://localhost:%s/healthz\n\nLogs: ./launch logs\nStop: ./launch stop\n' "$HOST_PORT" "$HOST_PORT"
+    exit 0
+  fi
+  sleep 1
+done
+docker compose logs --tail=30 portlight >&2
+fail 'Service did not become healthy. Use ./launch logs to investigate or ./launch stop to clean up.'
