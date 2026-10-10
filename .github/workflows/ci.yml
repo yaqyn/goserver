@@ -1,0 +1,28 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - run: test -z "$(gofmt -l main.go http.go http_test.go)"
+      - run: go vet ./...
+      - run: go test -race -cover ./...
+      - run: docker compose config --quiet
+      - run: docker build --build-arg VERSION=${{ github.sha }} -t portlight:ci .
+      - name: Container smoke test
+        run: |
+          docker run -d --name portlight-ci --read-only --cap-drop ALL --security-opt no-new-privileges -p 127.0.0.1:8991:8991 portlight:ci
+          trap 'docker logs portlight-ci; docker rm -f portlight-ci' EXIT
+          curl --retry 10 --retry-connrefused --retry-delay 1 --fail http://localhost:8991/healthz
+          curl --fail http://localhost:8991/ | python3 -c 'import json,sys; assert json.load(sys.stdin)["service"] == "Portlight"'
+          docker stop --time 15 portlight-ci
+          test "$(docker inspect -f '{{.State.ExitCode}}' portlight-ci)" = 0
