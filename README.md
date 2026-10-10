@@ -68,10 +68,19 @@ Override the listening port with `PORT=8080 go run .`. Missing `PORT` defaults t
 To build a versioned image yourself:
 
 ```bash
-docker build --build-arg VERSION=1.0.0 -t yaqyn/portlight:1.0.0 .
+docker build --build-arg VERSION=1.0.0 -t yaqyn/portlight-http-server:1.0.0 .
 ```
 
-This command builds locally; it does not publish to Docker Hub.
+### Run the published image
+
+```bash
+docker run -d --name portlight --read-only --cap-drop ALL --security-opt no-new-privileges -p 127.0.0.1:8991:8991 yaqyn/portlight-http-server:1.0.0
+```
+
+[Docker Hub](https://hub.docker.com/r/yaqyn/portlight-http-server) hosts the image.
+Use `1.0.0` for this release or `latest` for the current published release. Images
+currently target Linux amd64. Remove the container with `docker stop portlight`
+followed by `docker rm portlight` when finished.
 
 ## <img src="docs/readme/icons/contract.svg" width="24" height="24" alt=""> HTTP contract
 

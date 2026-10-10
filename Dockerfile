@@ -6,6 +6,11 @@ ARG VERSION=dev
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o /portlight .
 
 FROM scratch
+ARG VERSION=dev
+LABEL org.opencontainers.image.title="Portlight — HTTP Server" \
+      org.opencontainers.image.description="A focused Go HTTP service with clear operational signals" \
+      org.opencontainers.image.source="https://github.com/yaqyn/portlight-http-server" \
+      org.opencontainers.image.version="${VERSION}"
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /portlight /portlight
 USER 65532:65532
