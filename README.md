@@ -1,5 +1,128 @@
+![Portlight — Small service. Clear signals.](docs/readme/cover.png)
+
 # Portlight
 
-A small Go HTTP service with an explicit operating contract.
+**Small service. Clear signals.**
 
-Docker coursework is preserved under `examples/`.
+A focused Go HTTP service with a predictable startup, a small JSON API, and a
+clean shutdown. Built from Docker coursework into a containerized service with
+validated configuration, structured logs, and a minimal runtime image.
+
+[Run locally](#run-locally) · [HTTP contract](#http-contract) · [Operating boundaries](#operating-boundaries)
+
+## <img src="docs/readme/icons/overview.svg" width="24" height="24" alt=""> Built to stay understandable
+
+- **Explicit behavior:** GET and HEAD routes, real 404s, and method rejection.
+- **Clear signals:** health endpoints and JSON request logs.
+- **Bounded connections:** header, read, write, and idle timeouts.
+- **Clean exits:** SIGINT and SIGTERM drain active requests for up to ten seconds.
+- **Small runtime:** a static Go binary in a scratch image, running as UID 65532.
+- **No third-party Go dependencies:** the service uses the standard library.
+
+## <img src="docs/readme/icons/launch.svg" width="24" height="24" alt=""> Run locally
+
+Requires Go 1.27.1+ for native execution, or Docker with Compose for containers.
+
+```bash
+go run .
+curl http://localhost:8991/
+```
+
+Override the listening port with `PORT=8080 go run .`. Missing `PORT` defaults to
+8991; invalid values exit with an error instead of silently selecting a port.
+
+For the constrained container configuration:
+
+```bash
+docker compose up --build -d
+curl http://localhost:8991/healthz
+docker compose logs -f
+# Stop when finished; containers do not auto-start on reboot.
+docker compose down
+```
+
+If 8991 is occupied, use `HOST_PORT=8992 docker compose up --build -d`, then
+visit `http://localhost:8992/`. Compose binds the published port to loopback.
+
+To build a versioned image yourself:
+
+```bash
+docker build --build-arg VERSION=1.0.0 -t yaqyn/portlight:1.0.0 .
+```
+
+This command builds locally; it does not publish to Docker Hub.
+
+## <img src="docs/readme/icons/contract.svg" width="24" height="24" alt=""> HTTP contract
+
+| Route | GET response | Purpose |
+| --- | --- | --- |
+| `/` | Service name, description, and build version | Identify the deployment |
+| `/healthz` | `{"status":"ok"}` | Confirm HTTP handling is alive |
+| `/readyz` | `{"status":"ok"}` | Confirm this dependency-free service is ready |
+
+HEAD is supported on these routes. Other methods return 405; unknown routes
+return 404. Responses disable caching and send `X-Content-Type-Options: nosniff`.
+Health endpoints contain no dependency checks because the service has no database
+or external service dependencies.
+
+## <img src="docs/readme/icons/architecture.svg" width="24" height="24" alt=""> From source to request
+
+```mermaid
+flowchart LR
+    Source[Go source] --> Build[Static binary build]
+    Build --> Runtime[Non-root scratch image]
+    Client[HTTP client] --> Port[Host port 8991]
+    Port --> Runtime
+    Runtime --> Routes[Identity and health routes]
+    Runtime --> Logs[JSON logs to stdout]
+```
+
+The image builds from source rather than a binary sitting on a developer's
+machine. Its build context includes only the Go module and application source;
+local credentials, examples, and generated assets stay outside the image.
+
+## <img src="docs/readme/icons/operations.svg" width="24" height="24" alt=""> Operating boundaries
+
+| Setting | Value |
+| --- | --- |
+| Header / read / write / idle timeouts | 5s / 15s / 15s / 60s |
+| Maximum request headers | 16 KiB |
+| Shutdown drain deadline | 10s |
+| Compose stop grace period | 15s |
+| Compose resources | 128 MiB memory, 1 CPU, 64 processes |
+| Runtime privileges | Non-root, read-only filesystem, no capabilities |
+| Local logs | Rotated local driver, 10 MiB × 3 files |
+| Automatic restart | Disabled for on-demand development |
+
+Every request logs method, path, status, and elapsed milliseconds. Request bodies,
+query parameters, and authorization headers are not logged. Avoid personal data
+in URL paths, which are logged.
+
+For public deployments, place the service behind a TLS reverse proxy and set
+appropriate ingress limits, monitoring, and restart policy in your deployment
+platform. There is no authentication, database, rate limiter, or persistence.
+This repository provides a hardened small-service baseline, not evidence of
+production deployment or a security certification. Rebuild regularly to pick up
+Go security updates and verify the image in your own environment.
+
+## <img src="docs/readme/icons/verify.svg" width="24" height="24" alt=""> Verify the contract
+
+```bash
+go test -race -cover ./...
+go vet ./...
+docker compose config --quiet
+```
+
+CI verifies formatting, tests, static analysis, image construction, HTTP smoke
+checks, and a zero-exit graceful container shutdown. No deployment or registry
+credentials are required by the workflow.
+
+## <img src="docs/readme/icons/origin.svg" width="24" height="24" alt=""> Learning roots
+
+Portlight started as a Boot.dev Docker exercise. The original Caddy networking
+configuration and Python book-report exercise remain under `examples/`; they
+are separate teaching artifacts and are excluded from the production image.
+
+---
+
+Developed by **[Abdulrahman M. Yaqyn](https://yaqyn.dev)**.
