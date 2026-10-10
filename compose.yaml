@@ -1,0 +1,26 @@
+services:
+  portlight:
+    build:
+      context: .
+      args:
+        VERSION: ${VERSION:-dev}
+    image: yaqyn/portlight:${VERSION:-dev}
+    ports:
+      - "127.0.0.1:${HOST_PORT:-8991}:8991"
+    environment:
+      PORT: "8991"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 1.0
+    stop_grace_period: 15s
+    restart: "no"
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
