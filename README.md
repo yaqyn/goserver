@@ -111,6 +111,18 @@ The image builds from source rather than a binary sitting on a developer's
 machine. Its build context includes only the Go module and application source;
 local credentials, examples, and generated assets stay outside the image.
 
+## <img src="docs/readme/icons/verification.svg" width="24" height="24" alt=""> Verification
+
+```bash
+go test -race -cover ./...
+go vet ./...
+docker compose config --quiet
+```
+
+CI verifies formatting, tests, static analysis, image construction, HTTP smoke
+checks, and a zero-exit graceful container shutdown. No deployment or registry
+credentials are required by the workflow.
+
 ## <img src="docs/readme/icons/security.svg" width="24" height="24" alt=""> Security and limitations
 
 | Setting | Value |
@@ -134,18 +146,6 @@ platform. There is no authentication, database, rate limiter, or persistence.
 This repository provides a hardened small-service baseline, not evidence of
 production deployment or a security certification. Rebuild regularly to pick up
 Go security updates and verify the image in your own environment.
-
-## <img src="docs/readme/icons/verification.svg" width="24" height="24" alt=""> Verification
-
-```bash
-go test -race -cover ./...
-go vet ./...
-docker compose config --quiet
-```
-
-CI verifies formatting, tests, static analysis, image construction, HTTP smoke
-checks, and a zero-exit graceful container shutdown. No deployment or registry
-credentials are required by the workflow.
 
 ## <img src="docs/readme/icons/learning.svg" width="24" height="24" alt=""> Learning context
 
