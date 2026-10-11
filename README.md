@@ -11,7 +11,7 @@ A focused Go HTTP service with a predictable startup, a small JSON API, and a
 clean shutdown. Built from Docker coursework into a containerized service with
 validated configuration, structured logs, and a minimal runtime image.
 
-[Install the service](#installation) · [View the HTTP contract](#api-reference) · [Read operating boundaries](#security-and-limitations)
+[Install the service](#-installation) · [View the HTTP contract](#-api-reference) · [Read operating boundaries](#-security-and-limitations)
 
 ## <img src="docs/readme/icons/features.svg" width="24" height="24" alt=""> Features
 
