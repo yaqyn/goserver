@@ -2,9 +2,6 @@
 
 # Portlight — HTTP Server
 
-> **Learning Journey Project · Boot.dev**
-> Developed through Docker coursework and extended with practical server hardening.
-
 **Run a containerized Go service with health probes, request logs, and graceful shutdown.**
 
 A focused Go HTTP service with a predictable startup, a small JSON API, and a
@@ -156,3 +153,6 @@ are separate teaching artifacts and are excluded from the production image.
 ---
 
 Developed by **[Abdulrahman M. Yaqyn](https://yaqyn.github.io/folio-static-site/)**.
+
+> **Learning Journey Project · Boot.dev**
+> Developed through Docker coursework and extended with practical server hardening.
