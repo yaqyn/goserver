@@ -155,4 +155,4 @@ are separate teaching artifacts and are excluded from the production image.
 
 ---
 
-Developed by **[Abdulrahman M. Yaqyn](https://yaqyn.dev)**.
+Developed by **[Abdulrahman M. Yaqyn](https://yaqyn.github.io/folio-static-site/)**.
