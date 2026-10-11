@@ -5,15 +5,15 @@
 > **Learning Journey Project · Boot.dev**
 > Developed through Docker coursework and extended with practical server hardening.
 
-**Small service. Clear signals.**
+**Run a containerized Go service with health probes, request logs, and graceful shutdown.**
 
 A focused Go HTTP service with a predictable startup, a small JSON API, and a
 clean shutdown. Built from Docker coursework into a containerized service with
 validated configuration, structured logs, and a minimal runtime image.
 
-[Install and launch](#install-and-launch) · [HTTP contract](#http-contract) · [Operating boundaries](#operating-boundaries)
+[Install the service](#installation) · [View the HTTP contract](#api-reference) · [Read operating boundaries](#security-and-limitations)
 
-## <img src="docs/readme/icons/overview.svg" width="24" height="24" alt=""> Built to stay understandable
+## <img src="docs/readme/icons/features.svg" width="24" height="24" alt=""> Features
 
 - **Explicit behavior:** GET and HEAD routes, real 404s, and method rejection.
 - **Clear signals:** health endpoints and JSON request logs.
@@ -22,7 +22,7 @@ validated configuration, structured logs, and a minimal runtime image.
 - **Small runtime:** a static Go binary in a scratch image, running as UID 65532.
 - **No third-party Go dependencies:** the service uses the standard library.
 
-## <img src="docs/readme/icons/launch.svg" width="24" height="24" alt=""> Install and launch
+## <img src="docs/readme/icons/installation.svg" width="24" height="24" alt=""> Installation
 
 With **Git, Docker Engine, Docker Compose v2, Bash, and curl** installed, one line
 clones the project, builds the image, starts the service, and waits for readiness:
@@ -71,7 +71,7 @@ To build a versioned image yourself:
 docker build --build-arg VERSION=1.0.0 -t yaqyn/portlight-http-server:1.0.0 .
 ```
 
-### Run the published image
+### <img src="docs/readme/icons/launch.svg" width="20" height="20" alt=""> Run the published image
 
 ```bash
 docker run -d --name portlight --read-only --cap-drop ALL --security-opt no-new-privileges -p 127.0.0.1:8991:8991 yaqyn/portlight-http-server:1.0.0
@@ -82,7 +82,7 @@ Use `1.0.0` for this release or `latest` for the current published release. Imag
 currently target Linux amd64. Remove the container with `docker stop portlight`
 followed by `docker rm portlight` when finished.
 
-## <img src="docs/readme/icons/contract.svg" width="24" height="24" alt=""> HTTP contract
+## <img src="docs/readme/icons/api.svg" width="24" height="24" alt=""> API reference
 
 | Route | GET response | Purpose |
 | --- | --- | --- |
@@ -95,7 +95,7 @@ return 404. Responses disable caching and send `X-Content-Type-Options: nosniff`
 Health endpoints contain no dependency checks because the service has no database
 or external service dependencies.
 
-## <img src="docs/readme/icons/architecture.svg" width="24" height="24" alt=""> From source to request
+## <img src="docs/readme/icons/architecture.svg" width="24" height="24" alt=""> Architecture
 
 ```mermaid
 flowchart LR
@@ -111,7 +111,7 @@ The image builds from source rather than a binary sitting on a developer's
 machine. Its build context includes only the Go module and application source;
 local credentials, examples, and generated assets stay outside the image.
 
-## <img src="docs/readme/icons/operations.svg" width="24" height="24" alt=""> Operating boundaries
+## <img src="docs/readme/icons/security.svg" width="24" height="24" alt=""> Security and limitations
 
 | Setting | Value |
 | --- | --- |
@@ -135,7 +135,7 @@ This repository provides a hardened small-service baseline, not evidence of
 production deployment or a security certification. Rebuild regularly to pick up
 Go security updates and verify the image in your own environment.
 
-## <img src="docs/readme/icons/verify.svg" width="24" height="24" alt=""> Verify the contract
+## <img src="docs/readme/icons/verification.svg" width="24" height="24" alt=""> Verification
 
 ```bash
 go test -race -cover ./...
@@ -147,7 +147,7 @@ CI verifies formatting, tests, static analysis, image construction, HTTP smoke
 checks, and a zero-exit graceful container shutdown. No deployment or registry
 credentials are required by the workflow.
 
-## <img src="docs/readme/icons/origin.svg" width="24" height="24" alt=""> Learning roots
+## <img src="docs/readme/icons/learning.svg" width="24" height="24" alt=""> Learning context
 
 Portlight started as a Boot.dev Docker exercise. The original Caddy networking
 configuration and Python book-report exercise remain under `examples/`; they
