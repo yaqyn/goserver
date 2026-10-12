@@ -5,15 +5,16 @@ cd -- "$(dirname -- "${BASH_SOURCE[0]}")"
 usage() {
   cat <<'HELP'
 Portlight — HTTP Server
-Usage: ./launch [start|stop|status|logs|help]
+Usage: ./launch [start|stop|status|check|logs|help]
 
   start   Build, start, and wait for a healthy service (default)
   stop    Stop and remove this project's containers
   status  Show this project's container status
+  check   Check readiness without building or starting containers
   logs    Follow service logs; Ctrl+C leaves the service running
 
 Set HOST_PORT to choose another local port, e.g. HOST_PORT=8992 ./launch.
-Requires Docker Engine and Docker Compose v2. Starting also requires curl.
+Requires Docker Engine and Docker Compose v2. Starting and checking also require curl.
 HELP
 }
 fail() { printf 'Portlight: %s\n' "$*" >&2; exit 1; }
@@ -21,7 +22,7 @@ action="${1:-start}"
 [[ $# -le 1 ]] || { usage >&2; exit 2; }
 case "$action" in
   help|-h|--help) usage; exit 0 ;;
-  start|stop|status|logs) ;;
+  start|stop|status|check|logs) ;;
   *) usage >&2; exit 2 ;;
 esac
 command -v docker >/dev/null || fail 'Install Docker Engine and the Compose plugin, then retry.'
@@ -37,12 +38,18 @@ case "$action" in
   logs) docker compose logs --follow --tail=100 portlight; exit 0 ;;
 esac
 command -v curl >/dev/null || fail 'Install curl, then retry.'
+ready_url="http://127.0.0.1:${HOST_PORT}/readyz"
+if [[ "$action" == check ]]; then
+  curl --fail --silent --show-error --max-time 2 "$ready_url" >/dev/null || fail "Service is not ready at $ready_url. Use ./launch status or ./launch logs to investigate."
+  printf 'Ready: %s\n' "$ready_url"
+  exit 0
+fi
 printf '\nPortlight — HTTP Server\nBuilding and starting on http://localhost:%s ...\n\n' "$HOST_PORT"
 if ! docker compose up --build --detach; then
   fail "Startup failed. Check the output above; if the port is occupied, try HOST_PORT=8992 ./launch."
 fi
 for ((attempt=0; attempt<30; attempt++)); do
-  if curl --fail --silent --max-time 2 "http://127.0.0.1:${HOST_PORT}/healthz" >/dev/null; then
+  if curl --fail --silent --max-time 2 "$ready_url" >/dev/null; then
     printf '\nReady: http://localhost:%s\nHealth: http://localhost:%s/healthz\n\nLogs: ./launch logs\nStop: ./launch stop\n' "$HOST_PORT" "$HOST_PORT"
     exit 0
   fi

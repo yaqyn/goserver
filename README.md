@@ -39,9 +39,14 @@ Already cloned? Run **`./launch`** from the repository.
 | Start or rebuild | `./launch` |
 | Stop and remove project containers | `./launch stop` |
 | Inspect container status | `./launch status` |
+| Check readiness without restarting | `./launch check` |
 | Follow logs | `./launch logs` |
 | Show usage | `./launch help` |
 | Choose another port | `HOST_PORT=8992 ./launch` |
+
+Startup waits for `/readyz`. Use `./launch check` to check readiness with a
+two-second request timeout without building or starting containers; an unavailable
+service returns a nonzero status. Set `HOST_PORT` for checks on a custom port.
 
 Starting is explicit: the service does not auto-start on reboot. Logs can be closed
 with Ctrl+C without stopping the service. The Compose project name is fixed to
@@ -114,8 +119,11 @@ local credentials, examples, and generated assets stay outside the image.
 go test -race -cover ./...
 go vet ./...
 docker compose config --quiet
+python3 -m unittest discover -s tests -v
 ```
 
+Launcher tests require only Python 3 and Bash; mocked Docker and curl commands
+cover readiness, failure handling, custom ports, and startup probe selection.
 CI verifies formatting, tests, static analysis, image construction, HTTP smoke
 checks, and a zero-exit graceful container shutdown. No deployment or registry
 credentials are required by the workflow.

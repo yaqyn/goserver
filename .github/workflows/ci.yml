@@ -16,6 +16,7 @@ jobs:
       - run: test -z "$(gofmt -l main.go http.go http_test.go)"
       - run: go vet ./...
       - run: go test -race -cover ./...
+      - run: python3 -m unittest discover -s tests -v
       - run: bash -n launch
       - run: ./launch help
       - run: docker compose config --quiet
