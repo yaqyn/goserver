@@ -1,4 +1,4 @@
-![Portlight — Small service. Clear signals.](docs/readme/cover.png)
+![Portlight — Small service. Clear signals.](docs/readme/cover.webp)
 
 # Portlight — HTTP Server
 

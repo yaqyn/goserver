@@ -1,4 +1,4 @@
-![Portlight — Small service. Clear signals.](https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/cover.png)
+![Portlight — Small service. Clear signals.](https://raw.githubusercontent.com/yaqyn/portlight-http-server/main/docs/readme/cover.webp)
 
 # Portlight — HTTP Server
 
