@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"log/slog"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 )
@@ -17,6 +18,31 @@ func TestAddress(t *testing.T) {
 		if (err != nil) != tc.invalid || got != tc.want {
 			t.Errorf("address(%q) = %q, %v", tc.port, got, err)
 		}
+	}
+}
+
+func TestInformationalResponseDoesNotHideFinalStatus(t *testing.T) {
+	statuses := make(chan int, 1)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		recorder := &responseWriter{ResponseWriter: w, status: http.StatusOK}
+		recorder.WriteHeader(http.StatusEarlyHints)
+		recorder.WriteHeader(http.StatusCreated)
+		recorder.Write([]byte("created"))
+		statuses <- recorder.status
+	}))
+	defer server.Close()
+	response, err := http.Get(server.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := io.ReadAll(response.Body)
+	response.Body.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	observed := <-statuses
+	if response.StatusCode != http.StatusCreated || observed != http.StatusCreated || string(body) != "created" {
+		t.Fatalf("status=%d logged=%d body=%q", response.StatusCode, observed, body)
 	}
 }
 
