@@ -62,7 +62,7 @@ go run .
 curl http://localhost:8991/
 ```
 
-Override the listening port with `PORT=8080 go run .`. Missing `PORT` defaults to
+Run `go run . -version` to print the build version without starting the server. Override the listening port with `PORT=8080 go run .`. Missing `PORT` defaults to
 8991; invalid values exit with an error. Ctrl+C gracefully stops the native server.
 
 </details>
