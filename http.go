@@ -30,7 +30,7 @@ func handler(logger *slog.Logger) http.Handler {
 					writeJSON(recorder, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 				}
 			}
-			logger.Info("request", "method", r.Method, "path", r.URL.Path, "status", recorder.status, "duration_ms", time.Since(start).Milliseconds())
+			logger.Info("request", "method", r.Method, "path", r.URL.Path, "status", recorder.status, "bytes_written", recorder.bytes, "duration_ms", time.Since(start).Milliseconds())
 		}()
 		mux.ServeHTTP(recorder, r)
 	})
@@ -40,6 +40,7 @@ type responseWriter struct {
 	http.ResponseWriter
 	status int
 	wrote  bool
+	bytes  int
 }
 
 func (w *responseWriter) WriteHeader(status int) {
@@ -58,7 +59,9 @@ func (w *responseWriter) Write(p []byte) (int, error) {
 	if !w.wrote {
 		w.WriteHeader(http.StatusOK)
 	}
-	return w.ResponseWriter.Write(p)
+	n, err := w.ResponseWriter.Write(p)
+	w.bytes += n
+	return n, err
 }
 func (w *responseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func writeJSON(w http.ResponseWriter, status int, value any) {

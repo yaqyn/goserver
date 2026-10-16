@@ -141,7 +141,7 @@ credentials are required by the workflow.
 | Local logs | Rotated local driver, 10 MiB × 3 files |
 | Automatic restart | Disabled for on-demand development |
 
-Every request logs method, path, status, and elapsed milliseconds. Request bodies,
+Every request logs method, path, status, `bytes_written` accepted by the response writer, and elapsed milliseconds. This byte count is application output, not network traffic accounting (HEAD bodies may be suppressed by HTTP). Request bodies,
 query parameters, and authorization headers are not logged. Avoid personal data
 in URL paths, which are logged.
 

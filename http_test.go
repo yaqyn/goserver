@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"log/slog"
@@ -8,6 +9,20 @@ import (
 	"net/http/httptest"
 	"testing"
 )
+
+func TestRequestLogRecordsWrittenBodyBytes(t *testing.T) {
+	var logs bytes.Buffer
+	h := handler(slog.New(slog.NewJSONHandler(&logs, nil)))
+	response := httptest.NewRecorder()
+	h.ServeHTTP(response, httptest.NewRequest("GET", "/", nil))
+	var entry map[string]any
+	if err := json.Unmarshal(logs.Bytes(), &entry); err != nil {
+		t.Fatal(err)
+	}
+	if entry["bytes_written"] != float64(response.Body.Len()) || response.Body.Len() == 0 {
+		t.Fatalf("body=%d log=%s", response.Body.Len(), &logs)
+	}
+}
 
 func TestAddress(t *testing.T) {
 	for _, tc := range []struct {
