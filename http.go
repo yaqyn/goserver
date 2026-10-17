@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -20,6 +21,8 @@ func handler(logger *slog.Logger) http.Handler {
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
+		requestID := rand.Text()
+		w.Header().Set("X-Request-ID", requestID)
 		recorder := &responseWriter{ResponseWriter: w, status: http.StatusOK}
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Cache-Control", "no-store")
@@ -30,7 +33,7 @@ func handler(logger *slog.Logger) http.Handler {
 					writeJSON(recorder, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 				}
 			}
-			logger.Info("request", "method", r.Method, "path", r.URL.Path, "status", recorder.status, "bytes_written", recorder.bytes, "duration_ms", time.Since(start).Milliseconds())
+			logger.Info("request", "request_id", requestID, "method", r.Method, "path", r.URL.Path, "status", recorder.status, "bytes_written", recorder.bytes, "duration_ms", time.Since(start).Milliseconds())
 		}()
 		mux.ServeHTTP(recorder, r)
 	})

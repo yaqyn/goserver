@@ -36,6 +36,28 @@ func TestAddress(t *testing.T) {
 	}
 }
 
+func TestRequestIDsMatchResponseAndLogsAndAreUnique(t *testing.T) {
+	var logs bytes.Buffer
+	h := handler(slog.New(slog.NewJSONHandler(&logs, nil)))
+	previous := ""
+	for _, path := range []string{"/", "/missing"} {
+		logs.Reset()
+		response := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", path, nil)
+		req.Header.Set("X-Request-ID", "untrusted-client-id")
+		h.ServeHTTP(response, req)
+		id := response.Header().Get("X-Request-ID")
+		var entry map[string]any
+		if err := json.Unmarshal(logs.Bytes(), &entry); err != nil {
+			t.Fatal(err)
+		}
+		if id == "" || id == previous || id == "untrusted-client-id" || entry["request_id"] != id {
+			t.Fatalf("id=%q previous=%q log=%s", id, previous, &logs)
+		}
+		previous = id
+	}
+}
+
 func TestInformationalResponseDoesNotHideFinalStatus(t *testing.T) {
 	statuses := make(chan int, 1)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
